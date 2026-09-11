@@ -155,7 +155,7 @@ function RazonNo({ hoja, cerrar, acc }) {
 
 /* ---------- Nueva licitación ---------- */
 const CONVENIENCIA = [['Baja', 40], ['Media', 60], ['Alta', 80], ['Muy alta', 100]];
-function NuevaLic({ cerrar, acc }) {
+function NuevaLic({ cerrar, acc, db }) {
   const [pegado, setPegado] = useState('');
   const [f, setF] = useState({ numero: '', institucion: '', objeto: '', presupuesto: '', fecha_apertura: '', fecha_limite: '', muestras: '', conveniencia: '', notas: '' });
   const [aviso, setAviso] = useState(null);
@@ -185,6 +185,8 @@ function NuevaLic({ cerrar, acc }) {
   };
   const guardar = () => {
     if (!f.institucion.trim() || !f.objeto.trim() || !f.fecha_limite) { setAviso('Faltan la institución, qué piden o la fecha para presentar.'); return; }
+    const num = f.numero.trim();
+    if (num && db.LICITACIONES.some((l) => String(l.numero).trim() === num)) { setAviso('Esa licitación ya está cargada: llegó sola del correo o ya la habían pegado.'); return; }
     acc.licNueva({ ...f, numero: f.numero.trim(), institucion: f.institucion.trim(), objeto: f.objeto.trim(), presupuesto: aMonto(f.presupuesto), conveniencia: f.conveniencia === '' ? '' : Number(f.conveniencia) });
     cerrar();
   };
