@@ -24,7 +24,7 @@ const COLS_DESCARTADAS = ['fecha_alerta', 'numero', 'institucion', 'objeto', 'ti
 // Raíces de palabra: "camis" encuentra camisa, camisas, camiseta. Se comparan sin tildes.
 const FILTRO_INICIAL = {
   incluir: ['uniform', 'camis', 'pantal', 'overol', 'gabach', 'chalec', 'zapat', 'calzad', 'botas', 'textil', 'tela', 'confecc',
-    'prenda', 'ropa', 'vestuario', 'vestimenta', 'scrub', 'delantal', 'cofia', 'gorr', 'sueter', 'chaqueta', 'jacket', 'abrigo',
+    'prenda', 'ropa', 'vestuario', 'vestimenta','chaleco', 'scrub', 'delantal', 'cofia', 'gorr', 'sueter', 'chaqueta', 'jacket', 'abrigo',
     'impermeable', 'guante', 'bolso', 'bordad', 'sublimad', 'polo', 'traje', 'blusa', 'enagua', 'falda', 'sabana', 'toalla', 'lenceria', 'blancos de tiro'],
   excluir: ['construcci', 'obra', 'remodelac', 'asfalt', 'edific', 'vehicul', 'computad', 'medicament', 'aliment', 'mantenimiento',
     'reparaci', 'infraestructura', 'software', 'combustible'],
@@ -69,12 +69,14 @@ function cargarAlertas() {
   // 1) Correos nuevos
   GmailApp.search(BUSQUEDA, 0, 50).forEach((hilo) => {
     hilo.getMessages().forEach((msg) => {
+      // Cuenta la frase de SICOP, no el remitente: una alerta reenviada por un colaborador también entra.
+      const de = remitente(msg.getFrom());
       leerAlertas(msg.getPlainBody()).forEach((a) => {
         if (!a.numero || enHilo.has(a.numero) || enDescartadas.has(a.numero)) return;
         const c = clasificar(a.objeto, filtro);
         if (c.entra) {
           enHilo.add(a.numero);
-          nuevas.push(fila(a, ['Cargada del correo', c.nota].filter(Boolean).join(' · ')));
+          nuevas.push(fila(a, ['Cargada del correo de ' + de, c.nota].filter(Boolean).join(' · ')));
         } else {
           enDescartadas.add(a.numero);
           descartadas.push([hoy, a.numero, a.institucion, a.objeto, a.tipo, a.fecha_limite, a.fecha_apertura, c.motivo, false, '']);
@@ -107,6 +109,13 @@ function cargarAlertas() {
     desc.getRange(inicio, dCol('pasar_a_hilo') + 1, descartadas.length, 1).setNumberFormat('General').insertCheckboxes();
   }
   return { entraron: nuevas.length - rescatadas, descartadas: descartadas.length, rescatadas };
+}
+
+/** "Juan Pérez <juan@empresa.com>" → "Juan Pérez"; si no hay nombre, el correo. */
+function remitente(de) {
+  const s = String(de || '');
+  const nombre = s.replace(/<[^>]*>/, '').replace(/"/g, '').trim();
+  return nombre || s.replace(/[<>]/g, '').trim() || 'correo';
 }
 
 function etiqueta() {
