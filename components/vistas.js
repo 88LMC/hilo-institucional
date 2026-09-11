@@ -231,7 +231,7 @@ export function Licitaciones({ db, acc, abrir, seg, setSeg, limpiar }) {
   const vacio = { dec: 'Nada por decidir. Las licitaciones nuevas caen aquí.', curso: 'No hay ofertas en preparación.', cerr: 'Todavía no hay licitaciones cerradas.' }[s];
   return (
     <>
-      <button className="btn" onClick={() => abrir({ tipo: 'nuevaLic' })}>+ Nueva licitación</button>
+      <button className="btn" onClick={() => abrir({ tipo: 'nuevaLic' })}>+ Nueva licitación · pegar alerta de SICOP</button>
       <AvisoLimpieza n={nLimpia} limpiar={limpiar} />
       <Seg label="Estado" valor={s} onChange={(k) => setSeg((x) => ({ ...x, lic: k }))}
         opciones={[['dec', 'Por decidir', grupos.dec.length], ['curso', 'En curso', grupos.curso.length], ['cerr', 'Cerradas', grupos.cerr.length]]} />

@@ -157,14 +157,31 @@ function RazonNo({ hoja, cerrar, acc }) {
 const CONVENIENCIA = [['Baja', 40], ['Media', 60], ['Alta', 80], ['Muy alta', 100]];
 function NuevaLic({ cerrar, acc }) {
   const [pegado, setPegado] = useState('');
-  const [f, setF] = useState({ numero: '', institucion: '', objeto: '', presupuesto: '', fecha_apertura: '', fecha_limite: '', muestras: '', conveniencia: '' });
+  const [f, setF] = useState({ numero: '', institucion: '', objeto: '', presupuesto: '', fecha_apertura: '', fecha_limite: '', muestras: '', conveniencia: '', notas: '' });
   const [aviso, setAviso] = useState(null);
+  const [leido, setLeido] = useState(false);
   const set = (k) => (e) => setF((v) => ({ ...v, [k]: e.target.value }));
-  const leer = () => {
-    const x = M.leerAlerta(pegado);
-    if (!x.numero && !x.institucion) { setAviso('No encontré número ni institución en el texto. Llene los datos a mano.'); return; }
+  const leer = (texto) => {
+    const x = M.leerAlerta(texto);
+    if (!x.numero && !x.institucion) { setAviso('No encontré número ni institución en el texto. Llene los datos a mano.'); setLeido(false); return; }
     setF((v) => ({ ...v, ...Object.fromEntries(Object.entries(x).filter(([, val]) => val !== '')) }));
     setAviso(null);
+    setLeido(true);
+  };
+  const cambiarPegado = (v) => {
+    setPegado(v);
+    if (M.NUMERO_SICOP.test(v)) leer(v);
+  };
+  const pegarDelCorreo = async () => {
+    try {
+      const t = await navigator.clipboard.readText();
+      if (!t.trim()) throw new Error('vacío');
+      cambiarPegado(t);
+      if (!M.NUMERO_SICOP.test(t)) leer(t);
+    } catch {
+      setAviso('No pude leer lo copiado. Mantenga presionado el cuadro de abajo y toque Pegar.');
+      document.getElementById('nl-pegar')?.focus();
+    }
   };
   const guardar = () => {
     if (!f.institucion.trim() || !f.objeto.trim() || !f.fecha_limite) { setAviso('Faltan la institución, qué piden o la fecha para presentar.'); return; }
@@ -174,9 +191,10 @@ function NuevaLic({ cerrar, acc }) {
   return (
     <Marco cerrar={cerrar} titulo="Nueva licitación">
       <div className="field">
-        <label htmlFor="nl-pegar">Pegar la alerta (opcional)</label>
-        <textarea id="nl-pegar" rows={3} value={pegado} onChange={(e) => setPegado(e.target.value)} placeholder="Pegue aquí el correo o mensaje de SICOP" />
-        {pegado.trim() && <button className="btn sm" onClick={leer}>Leer alerta</button>}
+        <button className="btn pri" onClick={pegarDelCorreo}>Pegar alerta copiada del correo</button>
+        <textarea id="nl-pegar" rows={3} value={pegado} onChange={(e) => cambiarPegado(e.target.value)} placeholder="…o pegue aquí el texto del correo de SICOP" />
+        {pegado.trim() && !leido && <button className="btn sm" onClick={() => leer(pegado)}>Leer alerta</button>}
+        {leido && <span className="hint">Listo, se llenaron los datos. Revise y, si lo sabe, agregue el presupuesto.</span>}
       </div>
       <div className="field"><label htmlFor="nl-inst">Institución</label><input id="nl-inst" type="text" value={f.institucion} onChange={set('institucion')} /></div>
       <div className="field"><label htmlFor="nl-obj">¿Qué piden?</label><textarea id="nl-obj" rows={2} value={f.objeto} onChange={set('objeto')} /></div>

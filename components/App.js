@@ -133,7 +133,7 @@ function acciones(db, commit, avisar, idx) {
       commit([{ tab: 'LICITACIONES', id: l.id, set: { limpieza: '', ...set } }]);
     },
     licNueva(f) {
-      commit([{ tab: 'LICITACIONES', add: { ...f, id: `L${M.uid()}`, estado: 'Por decidir', razon: '', pasos: '', limpieza: '', notas: '', ultimo_mov: M.hoy(), creado: M.hoy() } }]);
+      commit([{ tab: 'LICITACIONES', add: { ...f, id: `L${M.uid()}`, estado: 'Por decidir', razon: '', pasos: '', limpieza: '', notas: f.notas || '', ultimo_mov: M.hoy(), creado: M.hoy() } }]);
       avisar('Guardada en Por decidir');
     },
     cliNuevo(f) {
