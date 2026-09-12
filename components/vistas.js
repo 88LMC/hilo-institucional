@@ -280,6 +280,7 @@ export function Clientes({ db, acc, abrir, seg, setSeg }) {
               <div className="ladder" aria-hidden="true">{M.CLI_ETAPAS.map((_, i) => <i key={i} className={i <= e ? 'on' : ''} />)}</div>
               <div className="p-top"><span className="stage-name">{M.CLI_ETAPAS[e]}</span>{q > 7 && <span className="stale">Sin movimiento hace {q} días</span>}</div>
               <div className="next"><em>Siguiente:</em> {c.siguiente_paso || 'Sin definir'}</div>
+              {c.notas && <div className="p-nota">{c.notas}</div>}
               <div className="actions">
                 <button className="btn sm" onClick={() => abrir({ tipo: 'tarea', pid: c.id, titulo: `Tarea para ${corto}` })}>+ Tarea</button>
                 {e < M.CLI_ETAPAS.length - 1 && (
