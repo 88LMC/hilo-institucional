@@ -39,6 +39,16 @@ function instalar() {
   Logger.log('Instalado. Entraron a Hilo: ' + r.entraron + ' · descartadas por el filtro: ' + r.descartadas + ' · rescatadas: ' + r.rescatadas);
 }
 
+/** Menú "Hilo" en el Sheet para cargar las alertas sin esperar los 15 minutos. */
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu('Hilo').addItem('Cargar alertas de SICOP ahora', 'cargarAhora').addToUi();
+}
+
+function cargarAhora() {
+  const r = cargarAlertas();
+  SpreadsheetApp.getUi().alert('Entraron a Hilo: ' + r.entraron + '\nDescartadas por el filtro: ' + r.descartadas + '\nRescatadas: ' + r.rescatadas);
+}
+
 function cargarAlertas() {
   const ss = SpreadsheetApp.openById(SHEET_ID);
   const hoja = ss.getSheetByName('LICITACIONES');
